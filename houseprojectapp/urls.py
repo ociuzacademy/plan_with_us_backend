@@ -38,6 +38,7 @@ router.register(r'feedback', FeedbackViewSet, basename='feedback')
 router.register(r'product-bookings', ProductBookingView, basename='product-booking')
 router.register(r'cart-payments', CartPaymentViewSet, basename='cart-payments')
 router.register(r'booking-payment', BookingPaymentView, basename='booking-payment')
+router.register(r'advance-booking-payment', AdvanceBookingPaymentView, basename='advance-booking-payment')
 
 urlpatterns = [
       path('', include(router.urls)),

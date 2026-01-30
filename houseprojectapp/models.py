@@ -93,6 +93,11 @@ from .models import tbl_register, tbl_engineer, UserRequest
 
 from adminapp.models import HouseFeature  # import your HouseFeature model
 
+# models.py
+from django.db import models
+from .models import tbl_register, tbl_engineer, UserRequest
+
+from adminapp.models import HouseFeature  # import your HouseFeature model
 class EngineerBooking(models.Model):
     user = models.ForeignKey(tbl_register, on_delete=models.CASCADE, related_name="engineer_bookings")
     engineer = models.ForeignKey(tbl_engineer, on_delete=models.CASCADE, related_name="bookings")
@@ -106,12 +111,18 @@ class EngineerBooking(models.Model):
     cent = models.CharField(max_length=50, null=True, blank=True)
     sqft = models.CharField(max_length=50, null=True, blank=True)
     expected_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+
+    # ✅ NEW FIELD
+    advance_booking = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
     status = models.CharField(max_length=50, default='pending')
-    
-    # Add features field
     features = models.ManyToManyField(HouseFeature, blank=True, related_name="bookings")
     reject_reason = models.TextField(null=True, blank=True)
-
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -121,10 +132,40 @@ class EngineerBooking(models.Model):
             self.sqft = self.user_request.sqft
             self.expected_amount = self.user_request.expected_amount
         super().save(*args, **kwargs)
+    def __str__(self):
+        return f"{self.engineer.name} - {self.user.name} Booking"
+
+class EngineerBookingPayment(models.Model):
+    PAYMENT_CHOICES = [
+        ('card', 'Card'),
+        ('cash', 'Cash on Delivery'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    ]
+
+    booking = models.OneToOneField(EngineerBooking, on_delete=models.CASCADE, related_name='payment')
+    user = models.ForeignKey(tbl_register, on_delete=models.CASCADE)
+    payment_type = models.CharField(max_length=10, choices=PAYMENT_CHOICES)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='completed')
+
+
+    # Card fields
+    card_holder_name = models.CharField(max_length=100, blank=True, null=True)
+    card_number = models.CharField(max_length=16, blank=True, null=True)
+    expiry_date = models.CharField(max_length=7, blank=True, null=True)
+    cvv = models.CharField(max_length=4, blank=True, null=True)
+
+    # Amount (provided by Flutter)
+    total_amount = models.FloatField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Booking by {self.user.name} for {self.engineer.name}"
-
+        return f"{self.payment_type.upper()} Payment for Booking {self.booking.id} - {self.status}"
 
 
 class Feedback(models.Model):

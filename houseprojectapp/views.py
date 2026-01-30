@@ -605,29 +605,69 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import EngineerBooking
-
 class EngineerUpdateStatus(APIView):
     def patch(self, request, booking_id):
         """
-        Engineers can update booking status only.
+        Engineers can update booking status.
+        If status = accepted → advance_booking is required
         Example statuses: accepted, work_started, completed, rejected
         """
+
         try:
             booking = EngineerBooking.objects.get(id=booking_id)
         except EngineerBooking.DoesNotExist:
-            return Response({"error": "Booking not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        new_status = request.data.get("status")
-        if not new_status:
-            return Response({"error": "Status field is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Booking not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        # Update only the status
+        new_status = request.data.get("status")
+        advance_fee = request.data.get("advance_booking")
+
+        if not new_status:
+            return Response(
+                {"error": "Status field is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # ✅ If engineer accepts → advance fee is mandatory
+        if new_status == "accepted":
+            if advance_fee is None:
+                return Response(
+                    {"error": "Advance fee is required when accepting booking"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            booking.advance_booking = advance_fee
+
+        # ❌ Optional safety: prevent changing advance after accept
+        if new_status != "accepted" and advance_fee is not None:
+            return Response(
+                {"error": "Advance fee can only be set when status is accepted"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         booking.status = new_status
         booking.save()
 
-        return Response({"message": "Status updated successfully", "new_status": booking.status}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "message": "Status updated successfully",
+                "booking_id": booking.id,
+                "status": booking.status,
+                "advance_booking": booking.advance_booking
+            },
+            status=status.HTTP_200_OK
+        )
+    
 
 
+from rest_framework import viewsets
+from .models import EngineerBookingPayment
+from .serializers import AdvanceBookingPaymentSerializer
+class AdvanceBookingPaymentView(viewsets.ModelViewSet):
+    queryset = EngineerBookingPayment.objects.all()
+    serializer_class = AdvanceBookingPaymentSerializer
+    http_method_names = ['post','get']
 
 #FEEDBACK VIEWSET
 from rest_framework import viewsets

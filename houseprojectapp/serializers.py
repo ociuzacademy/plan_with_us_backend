@@ -354,7 +354,7 @@ class EngineerBookingReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user_name', 'user_phone', 'engineer_name', 'engineer_phone',
             'address', 'start_date', 'end_date', 'suggestion',
-            'cent', 'sqft', 'expected_amount', 'features', 'created_at', 'status','user_request','reject_reason'
+            'cent', 'sqft', 'expected_amount', 'features', 'created_at', 'status','user_request','reject_reason','advance_booking'
         ]
 
     def to_representation(self, instance):
@@ -372,6 +372,20 @@ class EngineerBookingReadSerializer(serializers.ModelSerializer):
 
         return rep
 
+from .models import EngineerBookingPayment
+from .serializers import *
+class AdvanceBookingPaymentSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.name', read_only=True)
+    engineer_name = serializers.CharField(source='booking.engineer.name', read_only=True)
+
+    class Meta:
+        model = EngineerBookingPayment
+        fields = [
+            'id', 'booking', 'user', 'user_name', 'engineer_name',
+            'payment_type', 'status',
+            'card_holder_name', 'card_number', 'expiry_date', 'cvv',
+            'total_amount', 'created_at','payment_type'
+        ]
 from rest_framework import serializers
 from .models import Feedback
 
