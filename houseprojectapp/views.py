@@ -378,6 +378,42 @@ class WorkViewSet(viewsets.ModelViewSet):
         return WorkSerializer           
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Work
+from .serializers import WorkReadSerializer
+
+
+class EngineerWorksView(APIView):
+    def get(self, request, engineer_id):
+        works = Work.objects.filter(engineer_id=engineer_id).order_by('-created_at')
+
+        serializer = WorkReadSerializer(works, many=True)
+        return Response({
+            "status": True,
+            "message": "Works fetched successfully",
+            "data": serializer.data
+        })
+
+
+class WorkDetailView(APIView):
+    def get(self, request, work_id):
+        try:
+            work = Work.objects.get(id=work_id)
+        except Work.DoesNotExist:
+            return Response({
+                "status": False,
+                "message": "Work not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = WorkReadSerializer(work)
+        return Response({
+            "status": True,
+            "message": "Work details fetched successfully",
+            "data": serializer.data
+        })
+
 
 #LIST OF HOUSE FEATURES
 from adminapp.models import HouseFeature
