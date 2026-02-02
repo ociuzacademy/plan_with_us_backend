@@ -1267,3 +1267,58 @@ class UserBookingsAPIView(APIView):
 
         serializer = EngineerBookingReadSerializer(bookings, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import BookingPayment
+from .serializers import BookingPaymentSerializer
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import EngineerBooking, EngineerBookingPayment
+from .serializers import AdvanceBookingPaymentSerializer
+
+class RejectedEngineerBookingsView(APIView):
+
+    def get(self, request, engineer_id):
+        bookings = EngineerBooking.objects.filter(
+            engineer_id=engineer_id,
+            status='rejected'
+        ).select_related('user', 'engineer').prefetch_related('features')
+
+        serializer = EngineerBookingWithPaymentSerializer(bookings, many=True)
+
+        return Response({
+            "status": True,
+            "message": "Rejected engineer bookings fetched successfully",
+            "data": serializer.data
+        })
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import EngineerBooking, EngineerBookingPayment
+from .serializers import AdvanceBookingPaymentSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import EngineerBooking
+from .serializers import EngineerBookingWithPaymentSerializer
+
+
+class AcceptedEngineerBookingsView(APIView):
+
+    def get(self, request, engineer_id):
+        bookings = EngineerBooking.objects.filter(
+            engineer_id=engineer_id,
+            status='accepted'
+        ).select_related('user', 'engineer').prefetch_related('features')
+
+        serializer = EngineerBookingWithPaymentSerializer(bookings, many=True)
+
+        return Response({
+            "status": True,
+            "message": "Accepted engineer bookings fetched successfully",
+            "data": serializer.data
+        })
+

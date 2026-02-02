@@ -386,6 +386,45 @@ class AdvanceBookingPaymentSerializer(serializers.ModelSerializer):
             'card_holder_name', 'card_number', 'expiry_date', 'cvv',
             'total_amount', 'created_at','payment_type'
         ]
+
+from rest_framework import serializers
+from .models import EngineerBooking, EngineerBookingPayment
+
+
+class EngineerBookingPaymentNestedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EngineerBookingPayment
+        fields = '__all__'
+
+
+class EngineerBookingWithPaymentSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.name', read_only=True)
+    user_phone = serializers.CharField(source='user.phone', read_only=True)
+    engineer_name = serializers.CharField(source='engineer.name', read_only=True)
+    engineer_phone = serializers.CharField(source='engineer.phone', read_only=True)
+
+    features = serializers.StringRelatedField(many=True, read_only=True)
+
+    payment = EngineerBookingPaymentNestedSerializer(read_only=True)
+
+    class Meta:
+        model = EngineerBooking
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+
+        # format dates
+        for field in ['start_date', 'end_date']:
+            val = getattr(instance, field)
+            if val:
+                rep[field] = val.strftime('%d/%m/%Y')
+
+        if instance.suggestion:
+            rep['suggestion'] = instance.suggestion.url
+
+        return rep
+
 from rest_framework import serializers
 from .models import Feedback
 
