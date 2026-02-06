@@ -76,5 +76,6 @@ urlpatterns = [
       path('engineer/bookings/rejected/<int:engineer_id>/',RejectedEngineerBookingsView.as_view(),name='rejected-engineer-bookings'),
       path('engineer/works/<int:engineer_id>/', EngineerWorksView.as_view()),
       path('engineer/work/<int:work_id>/', WorkDetailView.as_view()),
+      path('engineer/work/update/<int:work_id>/', UpdateWorkView.as_view()),
 ]
 

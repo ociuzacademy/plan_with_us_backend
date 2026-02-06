@@ -415,6 +415,36 @@ class WorkDetailView(APIView):
         })
 
 
+from rest_framework.parsers import MultiPartParser, FormParser
+from .serializers import WorkSerializer
+
+
+class UpdateWorkView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def put(self, request, work_id):
+        try:
+            work = Work.objects.get(id=work_id)
+        except Work.DoesNotExist:
+            return Response({
+                "status": False,
+                "message": "Work not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = WorkSerializer(work, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "status": True,
+                "message": "Work updated successfully"
+            })
+
+        return Response({
+            "status": False,
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
 #LIST OF HOUSE FEATURES
 from adminapp.models import HouseFeature
 from .serializers import HouseFeatureSerializer
