@@ -1388,3 +1388,69 @@ class AcceptedEngineerBookingsView(APIView):
             "data": serializer.data
         })
 
+
+
+class DeleteWorkView(APIView):
+    def delete(self, request, work_id):
+        try:
+            work = Work.objects.get(id=work_id)
+            work.delete()
+            return Response({"message": "Work deleted successfully"}, status=status.HTTP_200_OK)
+        except Work.DoesNotExist:
+            return Response({"error": "Work not found"}, status=status.HTTP_404_NOT_FOUND)
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import EngineerBooking
+from .serializers import EngineerBookingWithPaymentSerializer
+
+
+class EngineerViewbookingPaymentView(APIView):
+    def get(self, request, booking_id):
+        try:
+            booking = EngineerBooking.objects.select_related(
+                'user', 'engineer'
+            ).prefetch_related(
+                'features'
+            ).get(id=booking_id)
+        except EngineerBooking.DoesNotExist:
+            return Response({
+                "status": False,
+                "message": "Booking not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = EngineerBookingWithPaymentSerializer(booking)
+
+        return Response({
+            "status": True,
+            "message": "Booking payment details fetched successfully",
+            "data": serializer.data
+        })
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import EngineerBooking
+from .serializers import EngineerBookingWithPaymentSerializer
+
+
+class UserViewBookingPaymentView(APIView):
+    def get(self, request, booking_id):
+        try:
+            booking = EngineerBooking.objects.select_related(
+                'user', 'engineer'
+            ).get(id=booking_id)
+        except EngineerBooking.DoesNotExist:
+            return Response({
+                "status": False,
+                "message": "Booking not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = EngineerBookingWithPaymentSerializer(booking)
+
+        return Response({
+            "status": True,
+            "message": "Payment details fetched successfully",
+            "data": serializer.data
+        })

@@ -77,5 +77,9 @@ urlpatterns = [
       path('engineer/works/<int:engineer_id>/', EngineerWorksView.as_view()),
       path('engineer/work/<int:work_id>/', WorkDetailView.as_view()),
       path('engineer/work/update/<int:work_id>/', UpdateWorkView.as_view()),
+      path('engineer/work/delete/<int:work_id>/', DeleteWorkView.as_view()),
+      path('engineer_view_payment_of_booking/<int:booking_id>/',EngineerViewbookingPaymentView.as_view(),name='engineer_view_payment_of_booking'),
+      path('user_view_payment_of_booking/<int:booking_id>/',UserViewBookingPaymentView.as_view(),name='user_view_payment_of_booking'),
+
 ]
 
