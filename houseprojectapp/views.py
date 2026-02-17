@@ -422,7 +422,7 @@ from .serializers import WorkSerializer
 class UpdateWorkView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
-    def put(self, request, work_id):
+    def patch(self, request, work_id):
         try:
             work = Work.objects.get(id=work_id)
         except Work.DoesNotExist:
@@ -1377,7 +1377,7 @@ class AcceptedEngineerBookingsView(APIView):
     def get(self, request, engineer_id):
         bookings = EngineerBooking.objects.filter(
             engineer_id=engineer_id,
-            status='accepted'
+            status__in=['accepted', 'completed', 'work_started']
         ).select_related('user', 'engineer').prefetch_related('features')
 
         serializer = EngineerBookingWithPaymentSerializer(bookings, many=True)

@@ -1,3 +1,4 @@
+from pyexpat import features
 from rest_framework import serializers
 from .models import tbl_register, tbl_engineer
 
@@ -179,13 +180,16 @@ from adminapp.models import HouseFeature, Category
 class WorkSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
         child=serializers.ImageField(max_length=None, allow_empty_file=False, use_url=True),
-        write_only=True
+        write_only=True,
+        required=False
     )
-    property_image = serializers.ImageField(required=False, allow_null=True)
-    # accept list of feature IDs
+
     additional_features = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=False
     )
+
 
     class Meta:
         model = Work
@@ -209,6 +213,26 @@ class WorkSerializer(serializers.ModelSerializer):
             WorkImage.objects.create(work=work, image=img)
 
         return work
+    def update(self, instance, validated_data):
+        images = validated_data.pop('images', None)
+        features = validated_data.pop('additional_features', None)
+
+        # Update normal fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+            # Update additional features (convert list to comma string)
+        if features is not None:
+            instance.additional_features = ",".join(map(str, features))
+
+        instance.save()
+
+    # If new images provided, add them
+        if images:
+            for img in images:
+                WorkImage.objects.create(work=instance, image=img)
+
+        return instance
 
 
 class WorkReadSerializer(serializers.ModelSerializer):
@@ -348,13 +372,15 @@ class EngineerBookingReadSerializer(serializers.ModelSerializer):
     engineer_name = serializers.CharField(source='engineer.name', read_only=True)
     engineer_phone = serializers.CharField(source='engineer.phone', read_only=True)
     features = serializers.StringRelatedField(many=True, read_only=True)
+    payment_status = serializers.SerializerMethodField()
 
     class Meta:
         model = EngineerBooking
         fields = [
             'id', 'user_name', 'user_phone', 'engineer_name', 'engineer_phone',
             'address', 'start_date', 'end_date', 'suggestion',
-            'cent', 'sqft', 'expected_amount', 'features', 'created_at', 'status','user_request','reject_reason','advance_booking'
+            'cent', 'sqft', 'expected_amount', 'features', 'created_at', 'status',
+            'user_request','reject_reason','advance_booking','payment_status'
         ]
 
     def to_representation(self, instance):
@@ -371,6 +397,10 @@ class EngineerBookingReadSerializer(serializers.ModelSerializer):
                 rep[field] = val.strftime('%d/%m/%Y')
 
         return rep
+    def get_payment_status(self, obj):
+        if hasattr(obj, 'payment') and obj.payment:
+            return obj.payment.status
+        return None
 
 from .models import EngineerBookingPayment
 from .serializers import *
@@ -386,6 +416,9 @@ class AdvanceBookingPaymentSerializer(serializers.ModelSerializer):
             'card_holder_name', 'card_number', 'expiry_date', 'cvv',
             'total_amount', 'created_at','payment_type'
         ]
+
+from rest_framework import serializers
+from .models import EngineerBooking, EngineerBookingPayment
 
 from rest_framework import serializers
 from .models import EngineerBooking, EngineerBookingPayment
@@ -407,14 +440,29 @@ class EngineerBookingWithPaymentSerializer(serializers.ModelSerializer):
 
     payment = EngineerBookingPaymentNestedSerializer(read_only=True)
 
+    # ✅ ADD THIS
+    additional_amount = serializers.SerializerMethodField()
+
     class Meta:
         model = EngineerBooking
-        fields = '__all__'
+        fields = '__all__'   # no need to manually add
+
+    def get_additional_amount(self, obj):
+        from houseprojectapp.models import Work
+
+        work = Work.objects.filter(
+            engineer=obj.engineer
+        ).order_by('-created_at').first()
+
+        if work:
+            return work.additional_amount
+
+        return 0
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
 
-        # format dates
+        # Format dates
         for field in ['start_date', 'end_date']:
             val = getattr(instance, field)
             if val:
