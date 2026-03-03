@@ -1218,7 +1218,7 @@ class UserCartView(viewsets.ViewSet):
 
     def list(self, request, user_id=None):
         user = get_object_or_404(tbl_register, id=user_id)
-        cart_items = Cart.objects.filter(user=user)
+        cart_items = Cart.objects.filter(user=user,status="pending").select_related('product')
         
 
         if not cart_items.exists():
