@@ -377,7 +377,7 @@ class EngineerBookingReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = EngineerBooking
         fields = [
-            'id', 'user_name', 'user_phone', 'engineer_name', 'engineer_phone',
+            'id', 'user_name', 'user_phone', 'engineer_id', 'engineer_name', 'engineer_phone',
             'address', 'start_date', 'end_date', 'suggestion',
             'cent', 'sqft', 'expected_amount', 'features', 'created_at', 'status',
             'user_request','reject_reason','advance_booking','payment_status'
