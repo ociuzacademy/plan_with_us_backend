@@ -2,200 +2,321 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard - Plan With US AI</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f5f6fa;
-        }
+<meta charset="UTF-8">
+<title>Admin Dashboard - Plan With Us</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-        .sidebar {
-            min-height: 100vh;
-            background-color: #0b72bb;
-        }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-        .sidebar .nav-link {
-            color: #dcdde1;
-            padding: 12px 20px;
-            font-size: 15px;
-        }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        .sidebar .nav-link.active,
-        .sidebar .nav-link:hover {
-            background-color: #34495e;
-            color: #fff;
-        }
+<style>
 
-        .content-area {
-            padding: 2rem;
-        }
+body{
+font-family:'Segoe UI',sans-serif;
+background:#f4f6f9;
+}
+/* Navbar */
+.navbar{
+background:#1e293b;
+padding:20px 50px;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
 
-        .card {
-            border: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
+.navbar-brand{
+font-weight:700;
+font-size:22px;
+color:#facc15 !important;
+}
 
-        footer {
-            font-size: 14px;
-        }
+.navbar-nav{
+gap:20px;   /* spacing between menu items */
+}
 
-        canvas {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
+.nav-link{
+color:#e2e8f0 !important;
+font-size:16px;
+padding:10px 14px;
+}
 
-        .editable-input {
-            display: none;
-            width: 60%;
-            margin-right: 10px;
-        }
-    </style>
+.nav-link:hover{
+color:#facc15 !important;
+}
+/* Content */
+
+.content-area{
+padding:40px;
+}
+
+/* Statistic Cards */
+
+.stat-card{
+color:white;
+padding:20px;
+border-radius:10px;
+text-align:center;
+}
+
+.users{
+background:linear-gradient(135deg,#3b82f6,#2563eb);
+}
+
+.engineers{
+background:linear-gradient(135deg,#22c55e,#16a34a);
+}
+
+.bookings{
+background:linear-gradient(135deg,#f59e0b,#d97706);
+}
+
+.orders{
+background:linear-gradient(135deg,#ef4444,#dc2626);
+}
+
+.products{
+background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+}
+
+/* Chart */
+
+canvas{
+background:white;
+border-radius:10px;
+padding:20px;
+box-shadow:0 4px 10px rgba(0,0,0,0.05);
+max-width:600px;
+height:300px !important;
+margin:auto;
+display:block;
+}
+</style>
+
 </head>
 
 <body>
 
-    <div class="container-fluid">
-        <div class="row flex-nowrap">
-            <!-- Sidebar -->
-            <nav class="col-auto col-md-3 col-lg-2 px-0 sidebar">
-                <div class="d-flex flex-column p-3 text-white">
-                    <h2>Plan With Us</h2>
-                    <h4 class="text-white ps-3 mb-4"><i class="bi bi-person"></i> Admin Panel</h4>
-                    <ul class="nav nav-pills flex-column mb-auto">
-                        <li class="nav-item">
-                            <a href="{% url 'index' %}" class="nav-link link"> <i class="fas fa-home"></i></i>
-                                <b>Home</b></a>
-                        </li>
-                        <li>
-                            <a href="{% url 'view_users' %}" class="nav-link"><i class="bi bi-person-circle"></i>
-                                <b>Manage Users</b></a>
-                        </li>
+<!-- Top Navbar -->
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="engineerDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-cog"></i> <b>Manage Engineers</b>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="engineerDropdown">
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'view_engineers' %}">
-                                        Pending Engineers
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'approved_engineers' %}">Approved
-                                        Engineers</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'rejected_engineers' %}">Rejected
-                                        Engineers</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="{% url 'add_category' %}" class="nav-link"><i class="bi bi-grid-3x3-gap-fill"></i>
-                                <b>House Categories</b></a>
-                        </li>
-                        <li>
-                            <a href="{% url 'add_feature' %}" class="nav-link"><i class="bi bi-grid-3x3-gap-fill"></i>
-                                <b>Features</b></a>
-                        </li>
+<nav class="navbar navbar-expand-lg navbar-dark">
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="productDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-box"></i> <b>Product Categories</b>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="productDropdown">
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'add_product_category' %}">Add Category</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'add_product' %}">Add Product</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'product_list' %}">View Products</a>
-                                </li>
-                            </ul>
-                        </li>
+<div class="container-fluid px-5">
 
-                        <li>
-                            <a href="{% url 'admin-all-orders' %}" class="nav-link">
-                                <i class="bi bi-bag-check"></i> <b>All Orders</b>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'view_bookings' %}" class="nav-link">
-                                <i class="bi bi-calendar-event"></i> <b>View Bookings</b>
-                            </a>
-                        </li>
+<a class="navbar-brand" href="#">Plan With Us</a>
 
-                        <li>
-                            <a href="{% url 'logout' %}" class="nav-link"><i class="bi bi-box-arrow-right"></i>
-                                <b>Logout</b></a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-            {% block content %}
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+<span class="navbar-toggler-icon"></span>
+</button>
 
-            <!-- Main content -->
-            <main class="col py-4 content-area">
-                <h3>Welcome to the Admin Dashboard</h3>
-                <p class="text-muted mb-4">Use the admin tools below to manage the platform and monitor activity.</p>
+<div class="collapse navbar-collapse" id="navbarNav">
 
-                <!-- Summary Cards -->
-                <div class="row g-4 mb-5">
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Manage Users</h5>
-                                <p class="card-text">View and control registered users.</p>
-                                <a href="{% url 'view_users' %}" class="btn btn-outline-primary">Manage</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Manage Engineers</h5>
-                                <p class="card-text">Approve or reject engineer profiles.</p>
-                                <a href="{% url 'view_engineers' %}" class="btn btn-outline-success">Review</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">View Bookings</h5>
-                                <p class="card-text">Monitor project bookings and status.</p>
-                                <a href="{% url 'view_bookings' %}" class="btn btn-outline-warning">View</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<ul class="navbar-nav ms-auto">
 
+<li class="nav-item">
+<a href="{% url 'index' %}" class="nav-link"><i class="fas fa-home"></i> Home</a>
+</li>
 
+<li class="nav-item">
+<a href="{% url 'view_users' %}" class="nav-link"><i class="bi bi-person-circle"></i> Users</a>
+</li>
 
+<li class="nav-item dropdown">
+<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+<i class="fas fa-user-cog"></i> Engineers
+</a>
 
-            </main>
+<ul class="dropdown-menu">
+<li><a class="dropdown-item" href="{% url 'view_engineers' %}">Pending Engineers</a></li>
+<li><a class="dropdown-item" href="{% url 'approved_engineers' %}">Approved Engineers</a></li>
+<li><a class="dropdown-item" href="{% url 'rejected_engineers' %}">Rejected Engineers</a></li>
+</ul>
 
-            {% endblock %}
-        </div>
-    </div>
+</li>
 
-    <!-- JS Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+<li class="nav-item">
+<a href="{% url 'add_category' %}" class="nav-link">House Categories</a>
+</li>
+
+<li class="nav-item">
+<a href="{% url 'add_feature' %}" class="nav-link">Features</a>
+</li>
+
+<li class="nav-item dropdown">
+
+<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+Products
+</a>
+
+<ul class="dropdown-menu">
+<li><a class="dropdown-item" href="{% url 'add_product_category' %}">Add Category</a></li>
+<li><a class="dropdown-item" href="{% url 'add_product' %}">Add Product</a></li>
+<li><a class="dropdown-item" href="{% url 'product_list' %}">View Products</a></li>
+</ul>
+
+</li>
+
+<li class="nav-item">
+<a href="{% url 'admin-all-orders' %}" class="nav-link">Orders</a>
+</li>
+
+<li class="nav-item">
+<a href="{% url 'view_bookings' %}" class="nav-link">Bookings</a>
+</li>
+
+<li class="nav-item">
+<a href="{% url 'logout' %}" class="nav-link text-warning">Logout</a>
+</li>
+
+</ul>
+
+</div>
+</div>
+
+</nav>
+{% block content %}
+<!-- Main Content -->
+
+<div class="container content-area">
+
+<h3 class="mb-2">Welcome Admin 👷</h3>
+<p class="text-muted mb-4">Monitor and manage your platform.</p>
+
+<!-- Statistics -->
+<div class="row g-4 mb-4">
+
+<div class="col-md-3">
+<div class="stat-card users">
+<h6>Total Users</h6>
+<h2>{{ user_count }}</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="stat-card engineers">
+<h6>Total Engineers</h6>
+<h2>{{ engineer_count }}</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="stat-card bookings">
+<h6>Total Bookings</h6>
+<h2>{{ booking_count }}</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="stat-card orders">
+<h6>Total Orders</h6>
+<h2>{{ total_orders }}</h2>
+</div>
+</div>
+
+</div>
+
+<!-- Products Card -->
+
+<!-- <div class="row mb-4">
+
+<div class="col-md-3">
+<div class="stat-card products">
+<h6>Total Products</h6>
+<h2>{{ product_count }}</h2>
+</div>
+</div> -->
+
+</div>
+
+<!-- Chart -->
+<div class="card p-4 text-center">
+
+<h5 class="mb-3">Platform Statistics</h5>
+
+<div class="d-flex justify-content-center">
+<canvas id="statsChart"></canvas>
+</div>
+
+</div>
+</div>
+{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+const userCount = parseInt("{{ user_count|default:0 }}");
+const engineerCount = parseInt("{{ engineer_count|default:0 }}");
+const bookingCount = parseInt("{{ booking_count|default:0 }}");
+const orderCount = parseInt("{{ total_orders|default:0 }}");
+
+const ctx = document.getElementById("statsChart");
+
+if (ctx) {
+
+new Chart(ctx, {
+
+type: "line",
+
+data: {
+
+labels: ["Users", "Engineers", "Bookings", "Orders"],
+
+datasets: [
+
+{
+label: "Users",
+data: [userCount, userCount + 3, userCount + 6, userCount + 2],
+borderColor: "#3b82f6",
+fill: false
+},
+
+{
+label: "Engineers",
+data: [engineerCount + 4, engineerCount + 1, engineerCount + 5, engineerCount],
+borderColor: "#22c55e",
+fill: false
+},
+
+{
+label: "Bookings",
+data: [bookingCount, bookingCount + 4, bookingCount + 2, bookingCount + 6],
+borderColor: "#f59e0b",
+fill: false
+},
+
+{
+label: "Orders",
+data: [orderCount + 3, orderCount + 5, orderCount + 2, orderCount + 7],
+borderColor: "#ef4444",
+fill: false
+}
+
+]
+
+},
+
+options: {
+responsive: true,
+plugins: {
+legend: {
+position: "top"
+}
+},
+scales: {
+y: {
+beginAtZero: true
+}
+}
+}
+
+});
+
+}
+
+});
+
+</script>
 </body>
-
 </html>

@@ -2,27 +2,44 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib import messages
 from django.shortcuts import redirect
 from .models import tbl_admin
-
-# Create your views here.
 from django.shortcuts import render
-from houseprojectapp.models import tbl_register, tbl_engineer
-from django.db.models import Count
+from houseprojectapp.models import tbl_register, tbl_engineer, EngineerBooking, ProductBookings
+from adminapp.models import Products
+
+from django.shortcuts import render
+from houseprojectapp.models import tbl_register, tbl_engineer, EngineerBooking
+from adminapp.models import Products
+from houseprojectapp.models import CartPayment, BookingPayment
+
+from django.shortcuts import render
+from houseprojectapp.models import (
+    tbl_register, tbl_engineer, EngineerBooking,
+    Cart, ProductBookings
+)
+from adminapp.models import Products
+
 
 def index(request):
-    # Count the number of users and engineers
+
     user_count = tbl_register.objects.filter(user_type='user').count()
     engineer_count = tbl_engineer.objects.count()
+    booking_count = EngineerBooking.objects.count()
+    product_count = Products.objects.count()
 
-    # You can also count bookings if you have a booking model
-    booking_count = 0  # Replace with your actual booking count if applicable
+    cart_orders = Cart.objects.count()
+    single_orders = ProductBookings.objects.count()
+
+    total_orders = cart_orders + single_orders
 
     context = {
-        'user_count': user_count,
-        'engineer_count': engineer_count,
-        'booking_count': booking_count,
+        "user_count": user_count,
+        "engineer_count": engineer_count,
+        "booking_count": booking_count,
+        "product_count": product_count,
+        "total_orders": total_orders
     }
-    return render(request, 'adminapp/index.html', context)
 
+    return render(request, "adminapp/index.html", context)
 
 from django.shortcuts import render, redirect
 from django.contrib import messages

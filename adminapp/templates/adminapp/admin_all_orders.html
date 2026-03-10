@@ -2,7 +2,19 @@
 {% load static %}
 
 {% block content %}
+<style>
+/* Override tab colors for All Orders page */
+#orderTabs .nav-link{
+    color: black !important;
+    font-weight: 600;
+}
 
+#orderTabs .nav-link.active{
+    color: black !important;
+    background-color: #f8f9fa;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+</style>
 <div class="container mt-4">
 
     <h3 class="text-center mb-4">All Orders</h3>
