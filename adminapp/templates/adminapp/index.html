@@ -32,7 +32,7 @@ color:#facc15 !important;
 }
 
 .navbar-nav{
-gap:20px;   /* spacing between menu items */
+gap:20px;
 }
 
 .nav-link{
@@ -44,14 +44,13 @@ padding:10px 14px;
 .nav-link:hover{
 color:#facc15 !important;
 }
-/* Content */
 
+/* Content */
 .content-area{
 padding:40px;
 }
 
 /* Statistic Cards */
-
 .stat-card{
 color:white;
 padding:20px;
@@ -80,7 +79,6 @@ background:linear-gradient(135deg,#8b5cf6,#7c3aed);
 }
 
 /* Chart */
-
 canvas{
 background:white;
 border-radius:10px;
@@ -91,6 +89,23 @@ height:300px !important;
 margin:auto;
 display:block;
 }
+
+/* Dropdown fixes */
+.dropdown-menu{
+border-radius:8px;
+border:none;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.dropdown-item:hover{
+background:#facc15;
+color:#1e293b;
+}
+
+/* Fix dropdown toggle arrow color in dark navbar */
+.nav-link.dropdown-toggle::after {
+border-top-color: #e2e8f0;
+}
 </style>
 
 </head>
@@ -98,146 +113,130 @@ display:block;
 <body>
 
 <!-- Top Navbar -->
-
 <nav class="navbar navbar-expand-lg navbar-dark">
 
-<div class="container-fluid px-5">
+  <div class="container-fluid px-5">
 
-<a class="navbar-brand" href="#">Plan With Us</a>
+    <a class="navbar-brand" href="#">Plan With Us</a>
 
-<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-<span class="navbar-toggler-icon"></span>
-</button>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-<div class="collapse navbar-collapse" id="navbarNav">
+    <div class="collapse navbar-collapse" id="navbarNav">
 
-<ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto">
 
-<li class="nav-item">
-<a href="{% url 'index' %}" class="nav-link"><i class="fas fa-home"></i> Home</a>
-</li>
+        <li class="nav-item">
+          <a href="{% url 'index' %}" class="nav-link"><i class="fas fa-home"></i> Home</a>
+        </li>
 
-<li class="nav-item">
-<a href="{% url 'view_users' %}" class="nav-link"><i class="bi bi-person-circle"></i> Users</a>
-</li>
+        <li class="nav-item">
+          <a href="{% url 'view_users' %}" class="nav-link"><i class="bi bi-person-circle"></i> Users</a>
+        </li>
 
-<li class="nav-item dropdown">
-<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-<i class="fas fa-user-cog"></i> Engineers
-</a>
+        <!-- ✅ FIXED: Added href="#" and role="button" to dropdown toggle -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-user-cog"></i> Engineers
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{% url 'view_engineers' %}">Pending Engineers</a></li>
+            <li><a class="dropdown-item" href="{% url 'approved_engineers' %}">Approved Engineers</a></li>
+            <li><a class="dropdown-item" href="{% url 'rejected_engineers' %}">Rejected Engineers</a></li>
+          </ul>
+        </li>
 
-<ul class="dropdown-menu">
-<li><a class="dropdown-item" href="{% url 'view_engineers' %}">Pending Engineers</a></li>
-<li><a class="dropdown-item" href="{% url 'approved_engineers' %}">Approved Engineers</a></li>
-<li><a class="dropdown-item" href="{% url 'rejected_engineers' %}">Rejected Engineers</a></li>
-</ul>
+        <li class="nav-item">
+          <a href="{% url 'add_category' %}" class="nav-link">House Categories</a>
+        </li>
 
-</li>
+        <li class="nav-item">
+          <a href="{% url 'add_feature' %}" class="nav-link">Features</a>
+        </li>
 
-<li class="nav-item">
-<a href="{% url 'add_category' %}" class="nav-link">House Categories</a>
-</li>
+        <!-- ✅ FIXED: Added href="#" and role="button" to dropdown toggle -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Products
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{% url 'add_product_category' %}">Add Category</a></li>
+            <li><a class="dropdown-item" href="{% url 'add_product' %}">Add Product</a></li>
+            <li><a class="dropdown-item" href="{% url 'product_list' %}">View Products</a></li>
+          </ul>
+        </li>
 
-<li class="nav-item">
-<a href="{% url 'add_feature' %}" class="nav-link">Features</a>
-</li>
+        <li class="nav-item">
+          <a href="{% url 'admin-all-orders' %}" class="nav-link">Orders</a>
+        </li>
 
-<li class="nav-item dropdown">
+        <li class="nav-item">
+          <a href="{% url 'view_bookings' %}" class="nav-link">Bookings</a>
+        </li>
 
-<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-Products
-</a>
+        <li class="nav-item">
+          <a href="{% url 'logout' %}" class="nav-link text-warning">Logout</a>
+        </li>
 
-<ul class="dropdown-menu">
-<li><a class="dropdown-item" href="{% url 'add_product_category' %}">Add Category</a></li>
-<li><a class="dropdown-item" href="{% url 'add_product' %}">Add Product</a></li>
-<li><a class="dropdown-item" href="{% url 'product_list' %}">View Products</a></li>
-</ul>
+      </ul>
 
-</li>
-
-<li class="nav-item">
-<a href="{% url 'admin-all-orders' %}" class="nav-link">Orders</a>
-</li>
-
-<li class="nav-item">
-<a href="{% url 'view_bookings' %}" class="nav-link">Bookings</a>
-</li>
-
-<li class="nav-item">
-<a href="{% url 'logout' %}" class="nav-link text-warning">Logout</a>
-</li>
-
-</ul>
-
-</div>
-</div>
+    </div>
+  </div>
 
 </nav>
+
 {% block content %}
 <!-- Main Content -->
-
 <div class="container content-area">
 
-<h3 class="mb-2">Welcome Admin 👷</h3>
-<p class="text-muted mb-4">Monitor and manage your platform.</p>
+  <h3 class="mb-2">Welcome Admin 👷</h3>
+  <p class="text-muted mb-4">Monitor and manage your platform.</p>
 
-<!-- Statistics -->
-<div class="row g-4 mb-4">
+  <!-- Statistics -->
+  <div class="row g-4 mb-4">
 
-<div class="col-md-3">
-<div class="stat-card users">
-<h6>Total Users</h6>
-<h2>{{ user_count }}</h2>
-</div>
-</div>
+    <div class="col-md-3">
+      <div class="stat-card users">
+        <h6>Total Users</h6>
+        <h2>{{ user_count }}</h2>
+      </div>
+    </div>
 
-<div class="col-md-3">
-<div class="stat-card engineers">
-<h6>Total Engineers</h6>
-<h2>{{ engineer_count }}</h2>
-</div>
-</div>
+    <div class="col-md-3">
+      <div class="stat-card engineers">
+        <h6>Total Engineers</h6>
+        <h2>{{ engineer_count }}</h2>
+      </div>
+    </div>
 
-<div class="col-md-3">
-<div class="stat-card bookings">
-<h6>Total Bookings</h6>
-<h2>{{ booking_count }}</h2>
-</div>
-</div>
+    <div class="col-md-3">
+      <div class="stat-card bookings">
+        <h6>Total Bookings</h6>
+        <h2>{{ booking_count }}</h2>
+      </div>
+    </div>
 
-<div class="col-md-3">
-<div class="stat-card orders">
-<h6>Total Orders</h6>
-<h2>{{ total_orders }}</h2>
-</div>
-</div>
+    <div class="col-md-3">
+      <div class="stat-card orders">
+        <h6>Total Orders</h6>
+        <h2>{{ total_orders }}</h2>
+      </div>
+    </div>
 
-</div>
+  </div>
 
-<!-- Products Card -->
+  <!-- Chart -->
+  <div class="card p-4 text-center">
 
-<!-- <div class="row mb-4">
+    <h5 class="mb-3">Platform Statistics</h5>
 
-<div class="col-md-3">
-<div class="stat-card products">
-<h6>Total Products</h6>
-<h2>{{ product_count }}</h2>
-</div>
-</div> -->
+    <div class="d-flex justify-content-center">
+      <canvas id="statsChart"></canvas>
+    </div>
 
-</div>
-
-<!-- Chart -->
-<div class="card p-4 text-center">
-
-<h5 class="mb-3">Platform Statistics</h5>
-
-<div class="d-flex justify-content-center">
-<canvas id="statsChart"></canvas>
-</div>
-
-</div>
+  </div>
 </div>
 {% endblock %}
 
@@ -246,77 +245,70 @@ Products
 
 document.addEventListener("DOMContentLoaded", function () {
 
-const userCount = parseInt("{{ user_count|default:0 }}");
-const engineerCount = parseInt("{{ engineer_count|default:0 }}");
-const bookingCount = parseInt("{{ booking_count|default:0 }}");
-const orderCount = parseInt("{{ total_orders|default:0 }}");
+  const userCount = parseInt("{{ user_count|default:0 }}");
+  const engineerCount = parseInt("{{ engineer_count|default:0 }}");
+  const bookingCount = parseInt("{{ booking_count|default:0 }}");
+  const orderCount = parseInt("{{ total_orders|default:0 }}");
 
-const ctx = document.getElementById("statsChart");
+  const ctx = document.getElementById("statsChart");
 
-if (ctx) {
+  if (ctx) {
 
-new Chart(ctx, {
+    new Chart(ctx, {
 
-type: "line",
+      type: "line",
 
-data: {
+      data: {
+        labels: ["Users", "Engineers", "Bookings", "Orders"],
+        datasets: [
+          {
+            label: "Users",
+            data: [userCount, userCount + 3, userCount + 6, userCount + 2],
+            borderColor: "#3b82f6",
+            fill: false
+          },
+          {
+            label: "Engineers",
+            data: [engineerCount + 4, engineerCount + 1, engineerCount + 5, engineerCount],
+            borderColor: "#22c55e",
+            fill: false
+          },
+          {
+            label: "Bookings",
+            data: [bookingCount, bookingCount + 4, bookingCount + 2, bookingCount + 6],
+            borderColor: "#f59e0b",
+            fill: false
+          },
+          {
+            label: "Orders",
+            data: [orderCount + 3, orderCount + 5, orderCount + 2, orderCount + 7],
+            borderColor: "#ef4444",
+            fill: false
+          }
+        ]
+      },
 
-labels: ["Users", "Engineers", "Bookings", "Orders"],
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: "top"
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
 
-datasets: [
+    });
 
-{
-label: "Users",
-data: [userCount, userCount + 3, userCount + 6, userCount + 2],
-borderColor: "#3b82f6",
-fill: false
-},
-
-{
-label: "Engineers",
-data: [engineerCount + 4, engineerCount + 1, engineerCount + 5, engineerCount],
-borderColor: "#22c55e",
-fill: false
-},
-
-{
-label: "Bookings",
-data: [bookingCount, bookingCount + 4, bookingCount + 2, bookingCount + 6],
-borderColor: "#f59e0b",
-fill: false
-},
-
-{
-label: "Orders",
-data: [orderCount + 3, orderCount + 5, orderCount + 2, orderCount + 7],
-borderColor: "#ef4444",
-fill: false
-}
-
-]
-
-},
-
-options: {
-responsive: true,
-plugins: {
-legend: {
-position: "top"
-}
-},
-scales: {
-y: {
-beginAtZero: true
-}
-}
-}
-
-});
-
-}
+  }
 
 });
 
 </script>
+
 </body>
 </html>

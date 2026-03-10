@@ -341,7 +341,7 @@ class EngineerBookingSerializer(serializers.ModelSerializer):
             if val:
                 try:
                     # Try parsing dd/mm/yyyy
-                    parsed_date = datetime.strptime(val, '%d/%m/%Y').date()
+                    parsed_date = datetime.strptime(val, '%d-%m-%Y').date()
                     data[field] = parsed_date.isoformat()
                 except ValueError:
                     # If already in correct format, skip
@@ -362,7 +362,7 @@ class EngineerBookingSerializer(serializers.ModelSerializer):
         for field in date_fields:
             val = getattr(instance, field)
             if val:
-                rep[field] = val.strftime('%d/%m/%Y')
+                rep[field] = val.strftime('%d-%m-%Y')
 
         return rep
 
@@ -394,7 +394,7 @@ class EngineerBookingReadSerializer(serializers.ModelSerializer):
         for field in ['start_date', 'end_date']:
             val = getattr(instance, field)
             if val:
-                rep[field] = val.strftime('%d/%m/%Y')
+                rep[field] = val.strftime('%d-%m-%Y')
 
         return rep
     def get_payment_status(self, obj):
