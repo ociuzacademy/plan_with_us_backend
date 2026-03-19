@@ -2,313 +2,598 @@
 <html lang="en">
 
 <head>
-<meta charset="UTF-8">
-<title>Admin Dashboard - Plan With Us</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Plan With Us</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
+  <style>
+    :root {
+      --bg: #f0f2f7;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --navbar-bg: #1e293b;
+      --shadow: 0 4px 20px rgba(0,0,0,0.06);
+      --accent: #facc15;
+    }
 
-body{
-font-family:'Segoe UI',sans-serif;
-background:#f4f6f9;
-}
-/* Navbar */
-.navbar{
-background:#1e293b;
-padding:20px 50px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
-}
+    body.dark-mode {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --navbar-bg: #0f172a;
+      --shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
 
-.navbar-brand{
-font-weight:700;
-font-size:22px;
-color:#facc15 !important;
-}
+    * { transition: background 0.3s, color 0.3s, border-color 0.3s; }
 
-.navbar-nav{
-gap:20px;
-}
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-.nav-link{
-color:#e2e8f0 !important;
-font-size:16px;
-padding:10px 14px;
-}
+    /* ─── Navbar ─── */
+    .navbar {
+      background: var(--navbar-bg);
+      padding: 14px 40px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
 
-.nav-link:hover{
-color:#facc15 !important;
-}
+    .navbar-brand {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--accent) !important;
+      letter-spacing: -0.5px;
+    }
 
-/* Content */
-.content-area{
-padding:40px;
-}
+    .navbar-nav { gap: 4px; }
 
-/* Statistic Cards */
-.stat-card{
-color:white;
-padding:20px;
-border-radius:10px;
-text-align:center;
-}
+    .nav-link {
+      color: #cbd5e1 !important;
+      font-size: 14.5px;
+      font-weight: 500;
+      padding: 8px 12px !important;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
 
-.users{
-background:linear-gradient(135deg,#3b82f6,#2563eb);
-}
+    .nav-link:hover {
+      color: var(--accent) !important;
+      background: rgba(250,204,21,0.08);
+    }
 
-.engineers{
-background:linear-gradient(135deg,#22c55e,#16a34a);
-}
+    .nav-link.text-warning { color: var(--accent) !important; }
 
-.bookings{
-background:linear-gradient(135deg,#f59e0b,#d97706);
-}
+    .dropdown-menu {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      background: var(--card-bg);
+      padding: 6px;
+    }
 
-.orders{
-background:linear-gradient(135deg,#ef4444,#dc2626);
-}
+    .dropdown-item {
+      border-radius: 7px;
+      font-size: 14px;
+      color: var(--text);
+      padding: 8px 14px;
+    }
 
-.products{
-background:linear-gradient(135deg,#8b5cf6,#7c3aed);
-}
+    .dropdown-item:hover {
+      background: var(--accent);
+      color: #1e293b;
+    }
 
-/* Chart */
-canvas{
-background:white;
-border-radius:10px;
-padding:20px;
-box-shadow:0 4px 10px rgba(0,0,0,0.05);
-max-width:600px;
-height:300px !important;
-margin:auto;
-display:block;
-}
+    /* ─── Dark Mode Toggle ─── */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
 
-/* Dropdown fixes */
-.dropdown-menu{
-border-radius:8px;
-border:none;
-box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
+    .switch input { opacity: 0; width: 0; height: 0; }
 
-.dropdown-item:hover{
-background:#facc15;
-color:#1e293b;
-}
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: #475569;
+      border-radius: 34px;
+      transition: 0.35s;
+    }
 
-/* Fix dropdown toggle arrow color in dark navbar */
-.nav-link.dropdown-toggle::after {
-border-top-color: #e2e8f0;
-}
-</style>
+    .slider::before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.35s;
+    }
 
+    input:checked + .slider { background: var(--accent); }
+    input:checked + .slider::before { transform: translateX(24px); }
+
+    /* ─── Content ─── */
+    .content-area {
+      padding: 36px 48px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .page-sub {
+      color: var(--text-muted);
+      font-size: 14.5px;
+      margin-bottom: 28px;
+    }
+
+    /* ─── Stat Cards ─── */
+    .stat-card {
+      border-radius: 14px;
+      padding: 24px 20px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      cursor: default;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .stat-card .stat-icon {
+      font-size: 28px;
+      opacity: 0.85;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .stat-card h6 {
+      font-size: 12.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      opacity: 0.85;
+      margin-bottom: 6px;
+    }
+
+    .stat-card h2 {
+      font-family: 'Space Mono', monospace;
+      font-size: 34px;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1;
+    }
+
+    .stat-card .stat-label-small {
+      font-size: 12px;
+      opacity: 0.75;
+      margin-top: 4px;
+    }
+
+    .users    { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+    .engineers { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); }
+    .bookings { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); }
+    .orders   { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+
+    /* ─── Chart Card ─── */
+    .chart-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 28px 32px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .chart-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .chart-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+
+    /* Taller chart now that it spans full width */
+    .chart-wrapper {
+      position: relative;
+      height: 380px;
+    }
+
+    /* ─── Quick Links ─── */
+    .quick-link {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.2s;
+      box-shadow: var(--shadow);
+    }
+
+    .quick-link:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      color: var(--text);
+    }
+
+    .quick-link-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .quick-link-text { font-size: 13.5px; font-weight: 600; }
+    .quick-link-sub  { font-size: 11.5px; color: var(--text-muted); }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+      .content-area { padding: 20px; }
+      .navbar { padding: 12px 16px; }
+      .chart-wrapper { height: 260px; }
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- Top Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark">
+  <!-- ─── Navbar ─── -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
 
-  <div class="container-fluid px-5">
+      <a class="navbar-brand" href="#">⬡ Plan With Us</a>
 
-    <a class="navbar-brand" href="#">Plan With Us</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
 
-    <div class="collapse navbar-collapse" id="navbarNav">
+          <li class="nav-item">
+            <a href="{% url 'index' %}" class="nav-link"><i class="fas fa-home me-1"></i>Home</a>
+          </li>
 
-      <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a href="{% url 'view_users' %}" class="nav-link"><i class="bi bi-people me-1"></i>Users</a>
+          </li>
 
-        <li class="nav-item">
-          <a href="{% url 'index' %}" class="nav-link"><i class="fas fa-home"></i> Home</a>
-        </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-user-cog me-1"></i>Engineers
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{% url 'view_engineers' %}"><i class="bi bi-clock me-2 text-warning"></i>Pending</a></li>
+              <li><a class="dropdown-item" href="{% url 'approved_engineers' %}"><i class="bi bi-check-circle me-2 text-success"></i>Approved</a></li>
+              <li><a class="dropdown-item" href="{% url 'rejected_engineers' %}"><i class="bi bi-x-circle me-2 text-danger"></i>Rejected</a></li>
+            </ul>
+          </li>
 
-        <li class="nav-item">
-          <a href="{% url 'view_users' %}" class="nav-link"><i class="bi bi-person-circle"></i> Users</a>
-        </li>
+          <li class="nav-item">
+            <a href="{% url 'add_category' %}" class="nav-link"><i class="bi bi-house me-1"></i>Categories</a>
+          </li>
 
-        <!-- ✅ FIXED: Added href="#" and role="button" to dropdown toggle -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-user-cog"></i> Engineers
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="{% url 'view_engineers' %}">Pending Engineers</a></li>
-            <li><a class="dropdown-item" href="{% url 'approved_engineers' %}">Approved Engineers</a></li>
-            <li><a class="dropdown-item" href="{% url 'rejected_engineers' %}">Rejected Engineers</a></li>
-          </ul>
-        </li>
+          <li class="nav-item">
+            <a href="{% url 'add_feature' %}" class="nav-link"><i class="bi bi-stars me-1"></i>Features</a>
+          </li>
 
-        <li class="nav-item">
-          <a href="{% url 'add_category' %}" class="nav-link">House Categories</a>
-        </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="bi bi-box me-1"></i>Products
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{% url 'add_product_category' %}"><i class="bi bi-tags me-2"></i>Add Category</a></li>
+              <li><a class="dropdown-item" href="{% url 'add_product' %}"><i class="bi bi-plus-circle me-2"></i>Add Product</a></li>
+              <li><a class="dropdown-item" href="{% url 'product_list' %}"><i class="bi bi-list-ul me-2"></i>View Products</a></li>
+            </ul>
+          </li>
 
-        <li class="nav-item">
-          <a href="{% url 'add_feature' %}" class="nav-link">Features</a>
-        </li>
+          <li class="nav-item">
+            <a href="{% url 'admin-all-orders' %}" class="nav-link"><i class="bi bi-bag me-1"></i>Orders</a>
+          </li>
 
-        <!-- ✅ FIXED: Added href="#" and role="button" to dropdown toggle -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Products
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="{% url 'add_product_category' %}">Add Category</a></li>
-            <li><a class="dropdown-item" href="{% url 'add_product' %}">Add Product</a></li>
-            <li><a class="dropdown-item" href="{% url 'product_list' %}">View Products</a></li>
-          </ul>
-        </li>
+          <li class="nav-item">
+            <a href="{% url 'view_bookings' %}" class="nav-link"><i class="bi bi-calendar-check me-1"></i>Bookings</a>
+          </li>
 
-        <li class="nav-item">
-          <a href="{% url 'admin-all-orders' %}" class="nav-link">Orders</a>
-        </li>
+          <li class="nav-item">
+            <a href="{% url 'logout' %}" class="nav-link text-warning"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+          </li>
 
-        <li class="nav-item">
-          <a href="{% url 'view_bookings' %}" class="nav-link">Bookings</a>
-        </li>
+          <!-- Dark mode toggle -->
+          <li class="nav-item d-flex align-items-center ms-2 gap-2 text-light" style="font-size:16px;">
+            <i class="bi bi-sun" id="modeIcon"></i>
+            <label class="switch mb-0">
+              <input type="checkbox" id="darkModeToggle">
+              <span class="slider"></span>
+            </label>
+          </li>
 
-        <li class="nav-item">
-          <a href="{% url 'logout' %}" class="nav-link text-warning">Logout</a>
-        </li>
-
-      </ul>
-
+        </ul>
+      </div>
     </div>
+  </nav>
+
+  <!-- ─── Main Content ─── -->
+  {% block content %}
+  <div class="container-fluid content-area">
+
+    <div class="page-title">Welcome back, Admin 👷</div>
+    <div class="page-sub">Here's an overview of your platform's activity.</div>
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="stat-card users">
+          <span class="stat-icon"><i class="bi bi-people-fill"></i></span>
+          <h6>Total Users</h6>
+          <h2>{{ user_count }}</h2>
+          <div class="stat-label-small">Registered accounts</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card engineers">
+          <span class="stat-icon"><i class="fas fa-hard-hat"></i></span>
+          <h6>Engineers</h6>
+          <h2>{{ engineer_count }}</h2>
+          <div class="stat-label-small">Approved professionals</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card bookings">
+          <span class="stat-icon"><i class="bi bi-calendar-check-fill"></i></span>
+          <h6>Bookings</h6>
+          <h2>{{ booking_count }}</h2>
+          <div class="stat-label-small">Total appointments</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card orders">
+          <span class="stat-icon"><i class="bi bi-bag-fill"></i></span>
+          <h6>Orders</h6>
+          <h2>{{ total_orders }}</h2>
+          <div class="stat-label-small">Product purchases</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart — full width -->
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="chart-card">
+          <div class="chart-title">Platform Statistics</div>
+          <div class="chart-sub">Overview of users, engineers, bookings, and orders</div>
+          <div class="chart-wrapper">
+            <canvas id="statsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="chart-title mb-3">Quick Actions</div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="{% url 'view_users' %}" class="quick-link">
+          <div class="quick-link-icon" style="background:#dbeafe; color:#2563eb"><i class="bi bi-people-fill"></i></div>
+          <div>
+            <div class="quick-link-text">Users</div>
+            <div class="quick-link-sub">Manage</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="{% url 'view_engineers' %}" class="quick-link">
+          <div class="quick-link-icon" style="background:#dcfce7; color:#16a34a"><i class="fas fa-hard-hat"></i></div>
+          <div>
+            <div class="quick-link-text">Engineers</div>
+            <div class="quick-link-sub">Pending review</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="{% url 'add_product' %}" class="quick-link">
+          <div class="quick-link-icon" style="background:#ede9fe; color:#7c3aed"><i class="bi bi-plus-circle-fill"></i></div>
+          <div>
+            <div class="quick-link-text">Add Product</div>
+            <div class="quick-link-sub">New listing</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="{% url 'add_category' %}" class="quick-link">
+          <div class="quick-link-icon" style="background:#e0f2fe; color:#0284c7"><i class="bi bi-house-fill"></i></div>
+          <div>
+            <div class="quick-link-text">Categories</div>
+            <div class="quick-link-sub">House types</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="{% url 'view_bookings' %}" class="quick-link">
+          <div class="quick-link-icon" style="background:#fef9c3; color:#ca8a04"><i class="bi bi-calendar-check-fill"></i></div>
+          <div>
+            <div class="quick-link-text">Bookings</div>
+            <div class="quick-link-sub">All appointments</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="{% url 'admin-all-orders' %}" class="quick-link">
+          <div class="quick-link-icon" style="background:#fee2e2; color:#dc2626"><i class="bi bi-bag-fill"></i></div>
+          <div>
+            <div class="quick-link-text">Orders</div>
+            <div class="quick-link-sub">All purchases</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
   </div>
+  {% endblock %}
 
-</nav>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-{% block content %}
-<!-- Main Content -->
-<div class="container content-area">
+  <script>
+    // ─── Dark Mode ───
+    const toggle   = document.getElementById("darkModeToggle");
+    const modeIcon = document.getElementById("modeIcon");
+    const body     = document.body;
 
-  <h3 class="mb-2">Welcome Admin 👷</h3>
-  <p class="text-muted mb-4">Monitor and manage your platform.</p>
-
-  <!-- Statistics -->
-  <div class="row g-4 mb-4">
-
-    <div class="col-md-3">
-      <div class="stat-card users">
-        <h6>Total Users</h6>
-        <h2>{{ user_count }}</h2>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="stat-card engineers">
-        <h6>Total Engineers</h6>
-        <h2>{{ engineer_count }}</h2>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="stat-card bookings">
-        <h6>Total Bookings</h6>
-        <h2>{{ booking_count }}</h2>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="stat-card orders">
-        <h6>Total Orders</h6>
-        <h2>{{ total_orders }}</h2>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Chart -->
-  <div class="card p-4 text-center">
-
-    <h5 class="mb-3">Platform Statistics</h5>
-
-    <div class="d-flex justify-content-center">
-      <canvas id="statsChart"></canvas>
-    </div>
-
-  </div>
-</div>
-{% endblock %}
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  const userCount = parseInt("{{ user_count|default:0 }}");
-  const engineerCount = parseInt("{{ engineer_count|default:0 }}");
-  const bookingCount = parseInt("{{ booking_count|default:0 }}");
-  const orderCount = parseInt("{{ total_orders|default:0 }}");
-
-  const ctx = document.getElementById("statsChart");
-
-  if (ctx) {
-
-    new Chart(ctx, {
-
-      type: "line",
-
-      data: {
-        labels: ["Users", "Engineers", "Bookings", "Orders"],
-        datasets: [
-          {
-            label: "Users",
-            data: [userCount, userCount + 3, userCount + 6, userCount + 2],
-            borderColor: "#3b82f6",
-            fill: false
-          },
-          {
-            label: "Engineers",
-            data: [engineerCount + 4, engineerCount + 1, engineerCount + 5, engineerCount],
-            borderColor: "#22c55e",
-            fill: false
-          },
-          {
-            label: "Bookings",
-            data: [bookingCount, bookingCount + 4, bookingCount + 2, bookingCount + 6],
-            borderColor: "#f59e0b",
-            fill: false
-          },
-          {
-            label: "Orders",
-            data: [orderCount + 3, orderCount + 5, orderCount + 2, orderCount + 7],
-            borderColor: "#ef4444",
-            fill: false
-          }
-        ]
-      },
-
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: "top"
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
+    function applyTheme(dark) {
+      if (dark) {
+        body.classList.add("dark-mode");
+        toggle.checked = true;
+        modeIcon.classList.replace("bi-sun", "bi-moon");
+      } else {
+        body.classList.remove("dark-mode");
+        toggle.checked = false;
+        modeIcon.classList.replace("bi-moon", "bi-sun");
       }
+    }
 
+    applyTheme(localStorage.getItem("theme") === "dark");
+
+    toggle.addEventListener("change", () => {
+      const isDark = toggle.checked;
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      applyTheme(isDark);
+      updateChartColors();
     });
 
-  }
+    // ─── Chart ───
+    let statsChart;
 
-});
+    function getChartColors() {
+      const isDark = body.classList.contains("dark-mode");
+      return {
+        grid: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
+        tick: isDark ? "#94a3b8" : "#64748b",
+      };
+    }
 
-</script>
+    function buildChart() {
+      const userCount     = parseInt("{{ user_count|default:0 }}");
+      const engineerCount = parseInt("{{ engineer_count|default:0 }}");
+      const bookingCount  = parseInt("{{ booking_count|default:0 }}");
+      const orderCount    = parseInt("{{ total_orders|default:0 }}");
+
+      const c   = getChartColors();
+      const ctx = document.getElementById("statsChart");
+      if (!ctx) return;
+
+      statsChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Users", "Engineers", "Bookings", "Orders"],
+          datasets: [{
+            label: "Count",
+            data: [userCount, engineerCount, bookingCount, orderCount],
+            backgroundColor: ["#3b82f6cc", "#22c55ecc", "#f59e0bcc", "#ef4444cc"],
+            borderColor:     ["#3b82f6",   "#22c55e",   "#f59e0b",   "#ef4444"],
+            borderWidth: 2,
+            borderRadius: 10,
+            borderSkipped: false,
+            barPercentage: 0.45,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: ctx => ` ${ctx.parsed.y} total` }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: c.grid },
+              ticks: { color: c.tick, font: { family: 'DM Sans', size: 13 } }
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: c.grid },
+              ticks: { color: c.tick, font: { family: 'DM Sans', size: 13 }, precision: 0 }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChartColors() {
+      if (!statsChart) return;
+      const c = getChartColors();
+      statsChart.options.scales.x.grid.color  = c.grid;
+      statsChart.options.scales.y.grid.color  = c.grid;
+      statsChart.options.scales.x.ticks.color = c.tick;
+      statsChart.options.scales.y.ticks.color = c.tick;
+      statsChart.update();
+    }
+
+    document.addEventListener("DOMContentLoaded", buildChart);
+  </script>
 
 </body>
 </html>
