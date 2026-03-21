@@ -3,51 +3,65 @@
 
 {% block content %}
 <style>
-/* Override tab colors for All Orders page */
-#orderTabs .nav-link{
+#orderTabs .nav-link {
     color: black !important;
     font-weight: 600;
 }
-
-#orderTabs .nav-link.active{
+#orderTabs .nav-link.active {
     color: black !important;
     background-color: #f8f9fa;
     border-color: #dee2e6 #dee2e6 #fff;
 }
+.product-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+.product-list li {
+    padding: 2px 0;
+    border-bottom: 1px dashed #dee2e6;
+    font-size: 0.875rem;
+}
+.product-list li:last-child {
+    border-bottom: none;
+}
 </style>
-<div class="container mt-4">
 
+<div class="container mt-4">
     <h3 class="text-center mb-4">All Orders</h3>
 
     <!-- TABS -->
     <ul class="nav nav-tabs" id="orderTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <a class="nav-link active" id="cartTab-tab" data-bs-toggle="tab" href="#cartTab" role="tab" aria-controls="cartTab" aria-selected="true">Cart Orders</a>
+            <a class="nav-link active" id="cartTab-tab" data-bs-toggle="tab"
+               href="#cartTab" role="tab" aria-selected="true">
+                Cart Orders
+            </a>
         </li>
-
         <li class="nav-item" role="presentation">
-            <a class="nav-link" id="bookingTab-tab" data-bs-toggle="tab" href="#bookingTab" role="tab" aria-controls="bookingTab" aria-selected="false">Single Product Orders</a>
+            <a class="nav-link" id="bookingTab-tab" data-bs-toggle="tab"
+               href="#bookingTab" role="tab" aria-selected="false">
+                Single Product Orders
+            </a>
         </li>
     </ul>
 
     <div class="tab-content mt-3">
 
         <!-- ========================= -->
-        <!-- 🛒 CART ORDERS TAB -->
+        <!-- 🛒 CART ORDERS TAB        -->
         <!-- ========================= -->
         <div class="tab-pane fade show active" id="cartTab">
             <div class="table-responsive shadow p-3 bg-white rounded">
                 <h5 class="mb-3">Cart Orders</h5>
-
                 <table class="table table-bordered table-hover align-middle text-center">
                     <thead class="table-dark">
                         <tr>
-                            <th>ID</th>
+                            <th>Payment ID</th>
                             <th>User</th>
-                            <th>Category</th>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Total Price (₹)</th>
+                            <th>Products (Category · Qty · Price)</th>
+                            <th>Order Total (₹)</th>
                             <th>Payment Type</th>
                             <th>Payment Status</th>
                             <th>Order Status</th>
@@ -59,38 +73,72 @@
                         <tr>
                             <td>{{ order.id }}</td>
                             <td>{{ order.user }}</td>
-                            <td>{{ order.category }}</td>
-                            <td>{{ order.product }}</td>
-                            <td>{{ order.quantity }}</td>
-                            <td>₹{{ order.total_price }}</td>
 
+                            <!-- Grouped product list -->
                             <td>
-                                {% if order.payment_type == 'PENDING' %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                {% elif order.payment_type == 'UPI' %}
+                                <ul class="product-list">
+                                    {% for p in order.products %}
+                                    <li>
+                                        <strong>{{ p.name }}</strong>
+                                        <span class="text-muted"> · {{ p.category }}</span>
+                                        · Qty: {{ p.quantity }}
+                                        · ₹{{ p.total_price }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+
+                            <td><strong>₹{{ order.total_price }}</strong></td>
+
+                            <!-- Payment Type Badge -->
+                            <td>
+                                {% if order.payment_type == 'upi' %}
                                     <span class="badge bg-success">UPI</span>
-                                {% elif order.payment_type == 'CARD' %}
+                                {% elif order.payment_type == 'card' %}
                                     <span class="badge bg-primary">Card</span>
                                 {% elif order.payment_type == 'cash' %}
-                                    <span class="badge bg-info text-dark">COD</span>
+                                    <span class="badge bg-info text-dark">Cash on Delivery</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">—</span>
                                 {% endif %}
                             </td>
 
+                            <!-- Payment Status Badge -->
                             <td>
                                 {% if order.payment_status == 'completed' %}
                                     <span class="badge bg-success">Completed</span>
                                 {% elif order.payment_status == 'pending' %}
                                     <span class="badge bg-warning text-dark">Pending</span>
-                                {% else %}
+                                {% elif order.payment_status == 'failed' %}
                                     <span class="badge bg-danger">Failed</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">—</span>
                                 {% endif %}
                             </td>
 
-                            <td>{{ order.status }}</td>
+                            <!-- Order Status Badge -->
+                            <td>
+                                {% if order.status == 'paid' %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% elif order.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif order.status == 'completed' %}
+                                    <span class="badge bg-primary">Completed</span>
+                                {% elif order.status == 'assigned' %}
+                                    <span class="badge bg-info text-dark">Assigned</span>
+                                {% elif order.status == 'full paid' %}
+                                    <span class="badge bg-dark">Full Paid</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ order.status }}</span>
+                                {% endif %}
+                            </td>
+
                             <td>{{ order.date|date:"Y-m-d H:i" }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="10" class="text-center">No cart orders found</td></tr>
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">No cart orders found</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -98,12 +146,11 @@
         </div>
 
         <!-- ========================= -->
-        <!-- 📦 SINGLE PRODUCT BOOKING TAB -->
+        <!-- 📦 SINGLE PRODUCT BOOKING -->
         <!-- ========================= -->
         <div class="tab-pane fade" id="bookingTab">
             <div class="table-responsive shadow p-3 bg-white rounded">
                 <h5 class="mb-3">Single Product Orders</h5>
-
                 <table class="table table-bordered table-hover align-middle text-center">
                     <thead class="table-dark">
                         <tr>
@@ -119,7 +166,6 @@
                             <th>Date</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         {% for order in booking_orders %}
                         <tr>
@@ -130,34 +176,59 @@
                             <td>{{ order.quantity }}</td>
                             <td>₹{{ order.total_price }}</td>
 
+                            <!-- Payment Type Badge -->
                             <td>
-                                {% if order.payment_type == 'PENDING' %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                {% elif order.payment_type == 'UPI' %}
+                                {% if order.payment_type == 'upi' %}
                                     <span class="badge bg-success">UPI</span>
-                                {% elif order.payment_type == 'CARD' %}
+                                {% elif order.payment_type == 'card' %}
                                     <span class="badge bg-primary">Card</span>
                                 {% elif order.payment_type == 'cash' %}
-                                    <span class="badge bg-info text-dark">COD</span>
+                                    <span class="badge bg-info text-dark">Cash on Delivery</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">No Payment</span>
                                 {% endif %}
                             </td>
 
+                            <!-- Payment Status Badge -->
                             <td>
                                 {% if order.payment_status == 'completed' %}
                                     <span class="badge bg-success">Completed</span>
                                 {% elif order.payment_status == 'pending' %}
                                     <span class="badge bg-warning text-dark">Pending</span>
-                                {% else %}
+                                {% elif order.payment_status == 'failed' %}
                                     <span class="badge bg-danger">Failed</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">—</span>
                                 {% endif %}
                             </td>
 
-                            <td>{{ order.status }}</td>
+                            <!-- Order Status Badge -->
+                            <td>
+                                {% if order.status == 'paid' %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% elif order.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif order.status == 'completed' %}
+                                    <span class="badge bg-primary">Completed</span>
+                                {% elif order.status == 'assigned' %}
+                                    <span class="badge bg-info text-dark">Assigned</span>
+                                {% elif order.status == 'user_meet' %}
+                                    <span class="badge bg-secondary">User Met</span>
+                                {% elif order.status == 'make_payment' %}
+                                    <span class="badge bg-dark">Payment Made</span>
+                                {% elif order.status == 'user_leave' %}
+                                    <span class="badge bg-danger">User Left</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ order.status }}</span>
+                                {% endif %}
+                            </td>
+
                             <td>{{ order.date|date:"Y-m-d H:i" }}</td>
                         </tr>
-
                         {% empty %}
-                        <tr><td colspan="10" class="text-center">No booking orders found</td></tr>
+                        <tr>
+                            <td colspan="10" class="text-center text-muted">No booking orders found</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -165,7 +236,5 @@
         </div>
 
     </div>
-
 </div>
-
 {% endblock %}

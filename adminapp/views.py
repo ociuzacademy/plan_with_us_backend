@@ -314,7 +314,6 @@ def admin_all_orders(request):
 
     for booking in bookings:
         payment = getattr(booking, 'payment', None)
-
         booking_orders.append({
             'id': booking.id,
             'user': booking.user.name,
@@ -323,38 +322,44 @@ def admin_all_orders(request):
             'quantity': booking.quantity,
             'total_price': booking.total_price,
             'status': booking.status,
-            'payment_type': payment.payment_type.upper() if payment else "PENDING",
-            'payment_status': payment.status if payment else "pending",
+            'payment_type': payment.payment_type if payment else "none",   # lowercase: upi/card/cash/none
+            'payment_status': payment.status if payment else "pending",    # lowercase: completed/pending/failed
             'date': booking.booking_date,
         })
 
-    # ========== CART ORDERS ==========
+    # ========== CART ORDERS — grouped by CartPayment ==========
     cart_orders = []
-    carts = Cart.objects.select_related(
-        'user', 'product', 'category'
-    ).all().order_by('created_at')
+    all_cart_payments = CartPayment.objects.select_related('user').order_by('created_at')
 
-    for cart in carts:
-        payment = CartPayment.objects.filter(
-            user=cart.user, cart_ids__contains=[cart.id]
-        ).first()
+    for payment in all_cart_payments:
+        cart_items = Cart.objects.select_related(
+            'user', 'product', 'category'
+        ).filter(id__in=payment.cart_ids)
+
+        products = [
+            {
+                'name': item.product.name,
+                'category': item.category.name,
+                'quantity': item.quantity,
+                'total_price': item.total_price,
+            }
+            for item in cart_items
+        ]
 
         cart_orders.append({
-            'id': cart.id,
-            'user': cart.user.name,
-            'category': cart.category.name,
-            'product': cart.product.name,
-            'quantity': cart.quantity,
-            'total_price': cart.total_price,
-            'status': cart.status,
-            'payment_type': payment.payment_type.upper() if payment else "PENDING",
-            'payment_status': payment.status if payment else "pending",
-            'date': cart.created_at,
+            'id': payment.id,
+            'user': payment.user.name,
+            'products': products,                          # list of dicts
+            'total_price': payment.total_amount,
+            'status': cart_items.first().status if cart_items.exists() else 'unknown',
+            'payment_type': payment.payment_type,          # lowercase: upi/card/cash
+            'payment_status': payment.status,              # lowercase: completed/pending/failed
+            'date': payment.created_at,
         })
 
     return render(request, 'adminapp/admin_all_orders.html', {
         'booking_orders': booking_orders,
-        'cart_orders': cart_orders
+        'cart_orders': cart_orders,
     })
 
 
