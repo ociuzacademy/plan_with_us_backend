@@ -20,13 +20,13 @@
     <h3 class="text-center mb-4">All Orders</h3>
 
     <!-- TABS -->
-    <ul class="nav nav-tabs" id="orderTabs">
-        <li class="nav-item">
-            <a class="nav-link active" data-bs-toggle="tab" href="#cartTab">Cart Orders</a>
+    <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="cartTab-tab" data-bs-toggle="tab" href="#cartTab" role="tab" aria-controls="cartTab" aria-selected="true">Cart Orders</a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#bookingTab">Single Product Orders</a>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="bookingTab-tab" data-bs-toggle="tab" href="#bookingTab" role="tab" aria-controls="bookingTab" aria-selected="false">Single Product Orders</a>
         </li>
     </ul>
 
