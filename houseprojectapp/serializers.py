@@ -298,7 +298,7 @@ class EngineerBookingSerializer(serializers.ModelSerializer):
 
     # ✅ Convert input (POST/PUT/PATCH)
     def to_internal_value(self, data):
-        data = data.copy()
+        data = data.dict()   # now it's a normal dict
 
         # --- handle features ---
         raw = data.get('features')
@@ -311,6 +311,7 @@ class EngineerBookingSerializer(serializers.ModelSerializer):
                     parsed = [parsed]
             except json.JSONDecodeError:
                 parsed = [int(x.strip()) for x in raw.split(',') if x.strip().isdigit()]
+
         elif isinstance(raw, list):
             parsed = []
             for item in raw:
@@ -328,27 +329,26 @@ class EngineerBookingSerializer(serializers.ModelSerializer):
                         parsed.append(int(item))
                     except Exception:
                         pass
+
         elif isinstance(raw, int):
             parsed = [raw]
 
+        # ✅ FIX HERE
         if parsed is not None:
-            data.setlist('features', [str(i) for i in parsed])
+            data['features'] = parsed
 
-        # --- ✅ Convert date strings from dd/mm/yyyy to yyyy-mm-dd ---
+        # --- date conversion ---
         date_fields = ['start_date', 'end_date']
         for field in date_fields:
             val = data.get(field)
             if val:
                 try:
-                    # Try parsing dd/mm/yyyy
                     parsed_date = datetime.strptime(val, '%d-%m-%Y').date()
                     data[field] = parsed_date.isoformat()
                 except ValueError:
-                    # If already in correct format, skip
                     pass
 
         return super().to_internal_value(data)
-
     # ✅ Convert output (GET)
     def to_representation(self, instance):
         rep = super().to_representation(instance)
