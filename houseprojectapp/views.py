@@ -882,10 +882,93 @@ class ProductBookingView(viewsets.ModelViewSet):
 
 
 
+# from rest_framework import viewsets, status
+# from rest_framework.response import Response
+# from django.shortcuts import get_object_or_404
+# from .models import BookingPayment, ProductBookings, tbl_register
+# from .serializers import BookingPaymentSerializer
+
+
+# class BookingPaymentView(viewsets.ModelViewSet):
+#     queryset = BookingPayment.objects.all()
+#     serializer_class = BookingPaymentSerializer
+#     http_method_names = ['post']
+
+#     def create(self, request, *args, **kwargs):
+#         booking_id = request.data.get("booking_id")
+#         user_id = request.data.get("user_id")
+#         payment_type = request.data.get("payment_type")
+#         total_amount = request.data.get("total_amount")
+#         upi_id = request.data.get("upi_id")
+#         card_holder_name = request.data.get("card_holder_name")
+#         card_number = request.data.get("card_number")
+#         expiry_date = request.data.get("expiry_date")
+#         cvv = request.data.get("cvv")
+
+#         # Validate required fields
+#         if not all([booking_id, user_id, payment_type]):
+#             return Response(
+#                 {"message": "booking_id, user_id, and payment_type are required"},
+#                 status=400
+#             )
+
+#         booking = get_object_or_404(ProductBookings, id=booking_id)
+#         user = get_object_or_404(tbl_register, id=user_id)
+
+#         # Prevent duplicate payments
+#         if BookingPayment.objects.filter(booking=booking).exists():
+#             return Response({"message": "Payment already exists for this booking"}, status=400)
+
+#         payment = BookingPayment(
+#             booking=booking,
+#             user=user,
+#             payment_type=payment_type,
+#             total_amount=total_amount or 0,
+#             payment_choice='booking_payment'
+#         )
+
+#         # ✅ Payment type logic
+#         if payment_type == "upi":
+#             if not upi_id:
+#                 return Response({"message": "upi_id is required for UPI payment"}, status=400)
+#             payment.upi_id = upi_id
+#             payment.status = "completed"
+#             booking.status = "paid"
+
+#         elif payment_type == "card":
+#             if not all([card_holder_name, card_number, expiry_date, cvv]):
+#                 return Response({"message": "All card fields are required"}, status=400)
+#             payment.card_holder_name = card_holder_name
+#             payment.card_number = card_number[-4:]
+#             payment.expiry_date = expiry_date
+#             payment.cvv = cvv
+#             payment.status = "completed"
+#             booking.status = "paid"
+
+#         elif payment_type == "cash":
+#             payment.status = "completed"  # COD is confirmed later
+#             booking.status = "completed"
+
+#         else:
+#             return Response({"message": "Invalid payment type"}, status=400)
+
+#         payment.save()
+#         booking.save()
+
+#         serializer = BookingPaymentSerializer(payment)
+#         return Response({
+#             "status": "success",
+#             "message": f"{payment.payment_type.upper()} payment created successfully",
+#             "data": serializer.data
+#         }, status=201)
+
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import BookingPayment, ProductBookings, tbl_register
+from django.db import transaction
+
+from .models import BookingPayment, ProductBookings
+from houseprojectapp.models import tbl_register
 from .serializers import BookingPaymentSerializer
 
 
@@ -899,6 +982,7 @@ class BookingPaymentView(viewsets.ModelViewSet):
         user_id = request.data.get("user_id")
         payment_type = request.data.get("payment_type")
         total_amount = request.data.get("total_amount")
+
         upi_id = request.data.get("upi_id")
         card_holder_name = request.data.get("card_holder_name")
         card_number = request.data.get("card_number")
@@ -915,50 +999,66 @@ class BookingPaymentView(viewsets.ModelViewSet):
         booking = get_object_or_404(ProductBookings, id=booking_id)
         user = get_object_or_404(tbl_register, id=user_id)
 
-        # Prevent duplicate payments
+        # Prevent duplicate payment
         if BookingPayment.objects.filter(booking=booking).exists():
-            return Response({"message": "Payment already exists for this booking"}, status=400)
+            return Response({"message": "Payment already exists"}, status=400)
 
-        payment = BookingPayment(
-            booking=booking,
-            user=user,
-            payment_type=payment_type,
-            total_amount=total_amount or 0,
-            payment_choice='booking_payment'
-        )
+        with transaction.atomic():  # ✅ Safe transaction
 
-        # ✅ Payment type logic
-        if payment_type == "upi":
-            if not upi_id:
-                return Response({"message": "upi_id is required for UPI payment"}, status=400)
-            payment.upi_id = upi_id
-            payment.status = "completed"
-            booking.status = "paid"
+            payment = BookingPayment(
+                booking=booking,
+                user=user,
+                payment_type=payment_type,
+                total_amount=total_amount or 0,
+                payment_choice='booking_payment'
+            )
 
-        elif payment_type == "card":
-            if not all([card_holder_name, card_number, expiry_date, cvv]):
-                return Response({"message": "All card fields are required"}, status=400)
-            payment.card_holder_name = card_holder_name
-            payment.card_number = card_number[-4:]
-            payment.expiry_date = expiry_date
-            payment.cvv = cvv
-            payment.status = "completed"
-            booking.status = "paid"
+            # ✅ Payment logic
+            if payment_type == "upi":
+                if not upi_id:
+                    return Response({"message": "upi_id required"}, status=400)
+                payment.upi_id = upi_id
+                payment.status = "completed"
+                booking.status = "paid"
 
-        elif payment_type == "cash":
-            payment.status = "completed"  # COD is confirmed later
-            booking.status = "completed"
+            elif payment_type == "card":
+                if not all([card_holder_name, card_number, expiry_date, cvv]):
+                    return Response({"message": "All card fields required"}, status=400)
+                payment.card_holder_name = card_holder_name
+                payment.card_number = card_number[-4:]
+                payment.expiry_date = expiry_date
+                payment.cvv = cvv
+                payment.status = "completed"
+                booking.status = "paid"
 
-        else:
-            return Response({"message": "Invalid payment type"}, status=400)
+            elif payment_type == "cash":
+                payment.status = "completed"
+                booking.status = "completed"
 
-        payment.save()
-        booking.save()
+            else:
+                return Response({"message": "Invalid payment type"}, status=400)
+
+            payment.save()
+
+            # 🔥 REDUCE STOCK AFTER PAYMENT SUCCESS
+            product = booking.product
+
+            if booking.quantity > product.quantity:
+                return Response(
+                    {"message": f"Insufficient stock for {product.name}"},
+                    status=400
+                )
+
+            product.quantity -= booking.quantity
+            product.save()
+
+            booking.save()
 
         serializer = BookingPaymentSerializer(payment)
+
         return Response({
             "status": "success",
-            "message": f"{payment.payment_type.upper()} payment created successfully",
+            "message": "Payment successful & stock updated",
             "data": serializer.data
         }, status=201)
 # -----------------------------
@@ -1117,10 +1217,97 @@ class RemoveCartView(generics.DestroyAPIView):
 
         
 
+# from rest_framework import viewsets, status
+# from rest_framework.response import Response
+# from django.shortcuts import get_object_or_404
+# from .models import CartPayment, Cart, tbl_register
+# from .serializers import CartPaymentSerializer
+
+
+# class CartPaymentViewSet(viewsets.ModelViewSet):
+#     queryset = CartPayment.objects.all()
+#     serializer_class = CartPaymentSerializer
+#     http_method_names = ['post', 'get']
+
+#     def create(self, request, *args, **kwargs):
+#         user_id = request.data.get("user_id")
+#         cart_ids = request.data.get("cart_ids", [])
+#         payment_type = request.data.get("payment_type")
+#         upi_id = request.data.get("upi_id")
+#         card_holder_name = request.data.get("card_holder_name")
+#         card_number = request.data.get("card_number")
+#         expiry_date = request.data.get("expiry_date")
+#         cvv = request.data.get("cvv")
+#         total_amount = request.data.get("total_amount")  # ✅ Flutter sends this
+
+#         if not user_id or not cart_ids or not payment_type:
+#             return Response(
+#                 {"message": "user_id, cart_ids, and payment_type are required"},
+#                 status=400
+#             )
+
+#         user = get_object_or_404(tbl_register, id=user_id)
+#         carts = Cart.objects.filter(id__in=cart_ids, user=user)
+
+#         if not carts.exists():
+#             return Response({"message": "No matching cart items found"}, status=400)
+
+#         # ✅ Removed total amount calculation (handled by Flutter)
+#         payment = CartPayment(
+#             user=user,
+#             cart_ids=cart_ids,
+#             payment_type=payment_type,
+#             total_amount=total_amount or 0,
+#             status='completed',
+#             payment_choice='cart_payment'
+#         )
+
+#         # ✅ Payment Type Handling
+#         if payment_type == 'upi':
+#             if not upi_id:
+#                 return Response({"message": "upi_id is required for UPI payment"}, status=400)
+#             payment.upi_id = upi_id
+
+#         elif payment_type == 'card':
+#             if not all([card_holder_name, card_number, expiry_date, cvv]):
+#                 return Response({"message": "All card details are required"}, status=400)
+#             payment.card_holder_name = card_holder_name
+#             payment.card_number = card_number[-4:]  # Store only last 4 digits
+#             payment.expiry_date = expiry_date
+#             payment.cvv = cvv
+
+#         elif payment_type == 'cash':
+#             payment.status = 'completed'  # ✅ COD stays pending until delivered
+
+#         else:
+#             return Response({"message": "Invalid payment type"}, status=400)
+
+#         payment.save()
+
+#         # ✅ Update cart statuses
+#         if payment.payment_type in ['card', 'upi']:
+#             carts.update(status="paid")
+#         elif payment.payment_type == 'cash':
+#             carts.update(status="completed")  # Payment not yet collected
+
+#         serializer = CartPaymentSerializer(payment)
+#         print(f"CartPayment created -> payment_id={payment.id}, user_id={payment.user.id}, payment_type={payment.payment_type}, total_amount={payment.total_amount}, status={payment.status}, payment_choice={payment.payment_choice}")
+#         return Response({
+#             "status": "success",
+#             "message": f"{payment.payment_type.upper()} payment created successfully",
+#             "data": serializer.data
+            
+#         }, status=201)
+        
+
+
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import CartPayment, Cart, tbl_register
+from django.db import transaction
+
+from .models import CartPayment, Cart
+from houseprojectapp.models import tbl_register
 from .serializers import CartPaymentSerializer
 
 
@@ -1133,13 +1320,15 @@ class CartPaymentViewSet(viewsets.ModelViewSet):
         user_id = request.data.get("user_id")
         cart_ids = request.data.get("cart_ids", [])
         payment_type = request.data.get("payment_type")
+        total_amount = request.data.get("total_amount")
+
         upi_id = request.data.get("upi_id")
         card_holder_name = request.data.get("card_holder_name")
         card_number = request.data.get("card_number")
         expiry_date = request.data.get("expiry_date")
         cvv = request.data.get("cvv")
-        total_amount = request.data.get("total_amount")  # ✅ Flutter sends this
 
+        # Validate required fields
         if not user_id or not cart_ids or not payment_type:
             return Response(
                 {"message": "user_id, cart_ids, and payment_type are required"},
@@ -1152,56 +1341,67 @@ class CartPaymentViewSet(viewsets.ModelViewSet):
         if not carts.exists():
             return Response({"message": "No matching cart items found"}, status=400)
 
-        # ✅ Removed total amount calculation (handled by Flutter)
-        payment = CartPayment(
-            user=user,
-            cart_ids=cart_ids,
-            payment_type=payment_type,
-            total_amount=total_amount or 0,
-            status='completed',
-            payment_choice='cart_payment'
-        )
+        with transaction.atomic():  # ✅ Safe transaction
 
-        # ✅ Payment Type Handling
-        if payment_type == 'upi':
-            if not upi_id:
-                return Response({"message": "upi_id is required for UPI payment"}, status=400)
-            payment.upi_id = upi_id
+            payment = CartPayment(
+                user=user,
+                cart_ids=cart_ids,
+                payment_type=payment_type,
+                total_amount=total_amount or 0,
+                status='completed',
+                payment_choice='cart_payment'
+            )
 
-        elif payment_type == 'card':
-            if not all([card_holder_name, card_number, expiry_date, cvv]):
-                return Response({"message": "All card details are required"}, status=400)
-            payment.card_holder_name = card_holder_name
-            payment.card_number = card_number[-4:]  # Store only last 4 digits
-            payment.expiry_date = expiry_date
-            payment.cvv = cvv
+            # ✅ Payment logic
+            if payment_type == 'upi':
+                if not upi_id:
+                    return Response({"message": "upi_id required"}, status=400)
+                payment.upi_id = upi_id
 
-        elif payment_type == 'cash':
-            payment.status = 'completed'  # ✅ COD stays pending until delivered
+            elif payment_type == 'card':
+                if not all([card_holder_name, card_number, expiry_date, cvv]):
+                    return Response({"message": "All card details required"}, status=400)
+                payment.card_holder_name = card_holder_name
+                payment.card_number = card_number[-4:]
+                payment.expiry_date = expiry_date
+                payment.cvv = cvv
 
-        else:
-            return Response({"message": "Invalid payment type"}, status=400)
+            elif payment_type == 'cash':
+                payment.status = 'completed'
 
-        payment.save()
+            else:
+                return Response({"message": "Invalid payment type"}, status=400)
 
-        # ✅ Update cart statuses
-        if payment.payment_type in ['card', 'upi']:
-            carts.update(status="paid")
-        elif payment.payment_type == 'cash':
-            carts.update(status="completed")  # Payment not yet collected
+            payment.save()
+
+            # 🔥 STEP 1: CHECK STOCK
+            for cart in carts:
+                if cart.quantity > cart.product.quantity:
+                    return Response(
+                        {"message": f"Insufficient stock for {cart.product.name}"},
+                        status=400
+                    )
+
+            # 🔥 STEP 2: REDUCE STOCK
+            for cart in carts:
+                product = cart.product
+                product.quantity -= cart.quantity
+                product.save()
+
+            # 🔥 STEP 3: UPDATE CART STATUS
+            if payment.payment_type in ['card', 'upi']:
+                carts.update(status="paid")
+            elif payment.payment_type == 'cash':
+                carts.update(status="completed")
 
         serializer = CartPaymentSerializer(payment)
-        print(f"CartPayment created -> payment_id={payment.id}, user_id={payment.user.id}, payment_type={payment.payment_type}, total_amount={payment.total_amount}, status={payment.status}, payment_choice={payment.payment_choice}")
+
         return Response({
             "status": "success",
-            "message": f"{payment.payment_type.upper()} payment created successfully",
+            "message": f"{payment.payment_type.upper()} payment successful & stock updated",
             "data": serializer.data
-            
         }, status=201)
-        
-
-
-
+    
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -1454,3 +1654,63 @@ class UserViewBookingPaymentView(APIView):
             "message": "Payment details fetched successfully",
             "data": serializer.data
         })
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+
+from .models import Wishlist
+from adminapp.models import Products
+from houseprojectapp.models import tbl_register
+
+
+@api_view(['POST'])
+def add_to_wishlist(request):
+    user_id = request.data.get('user_id')
+    product_id = request.data.get('product_id')
+
+    try:
+        user = tbl_register.objects.get(id=user_id)
+        product = Products.objects.get(id=product_id)
+    except tbl_register.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+    except Products.DoesNotExist:
+        return Response({"error": "Product not found"}, status=404)
+
+    # جلوگیری duplicate (important)
+    if Wishlist.objects.filter(user=user, product=product).exists():
+        return Response({"message": "Already in wishlist"}, status=200)
+
+    wishlist = Wishlist.objects.create(user=user, product=product)
+
+    return Response({
+        "message": "Added to wishlist",
+        "wishlist_id": wishlist.id,
+        "user_id": wishlist.user.id,
+        "product_id": wishlist.product.id,
+        "product_name":wishlist.product.name
+    }, status=status.HTTP_201_CREATED)
+
+
+from .serializers import WishlistSerializer
+
+
+@api_view(['GET'])
+def view_wishlist(request, user_id):
+    try:
+        user = tbl_register.objects.get(id=user_id)
+    except tbl_register.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+
+    wishlist_items = Wishlist.objects.filter(user=user).order_by('-added_at')
+    serializer = WishlistSerializer(wishlist_items, many=True)
+
+    return Response(serializer.data)
+
+@api_view(['DELETE'])
+def remove_from_wishlist(request, wishlist_id):
+    try:
+        item = Wishlist.objects.get(id=wishlist_id)
+        item.delete()
+        return Response({"message": "Removed from wishlist"})
+    except Wishlist.DoesNotExist:
+        return Response({"error": "Item not found"}, status=404)

@@ -310,3 +310,23 @@ class CartPayment(models.Model):
 
     def __str__(self):
         return f"Payment ({self.payment_type}) by {self.user.name} - {self.status}"
+
+from adminapp.models import Products
+from houseprojectapp.models import tbl_register
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(tbl_register, on_delete=models.CASCADE)
+    product = models.ForeignKey(Products, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.product.name} in {self.user.name}'s Wishlist"
+
+
+# class TblWishlist(models.Model):
+#     user = models.ForeignKey(tbl_register, on_delete=models.CASCADE)
+#     product = models.ForeignKey(Products, on_delete=models.CASCADE)
+#     added_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"{self.product.name} in {self.user.name}'s Wishlist"

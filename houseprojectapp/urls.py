@@ -36,8 +36,8 @@ router.register(r'works', WorkViewSet, basename='works')
 router.register(r'book_engineer',EngineerBookingViewSet,basename='book_engineer')
 router.register(r'feedback', FeedbackViewSet, basename='feedback')
 router.register(r'product-bookings', ProductBookingView, basename='product-booking')
-router.register(r'cart-payments', CartPaymentViewSet, basename='cart-payments')
 router.register(r'booking-payment', BookingPaymentView, basename='booking-payment')
+router.register(r'cart-payment', CartPaymentViewSet, basename='cart-payment')
 router.register(r'advance-booking-payment', AdvanceBookingPaymentView, basename='advance-booking-payment')
 
 urlpatterns = [
@@ -80,6 +80,8 @@ urlpatterns = [
       path('engineer/work/delete/<int:work_id>/', DeleteWorkView.as_view()),
       path('engineer_view_payment_of_booking/<int:booking_id>/',EngineerViewbookingPaymentView.as_view(),name='engineer_view_payment_of_booking'),
       path('user_view_payment_of_booking/<int:booking_id>/',UserViewBookingPaymentView.as_view(),name='user_view_payment_of_booking'),
-
-]
+      path('wishlist_add/', add_to_wishlist,name='add_to_wishlist'),
+      path('wishlist/<int:user_id>/', view_wishlist,name='view_wishlist'),
+      path('wishlist_remove/<int:wishlist_id>/', remove_from_wishlist,name='remove_from_wishlist'),
+] 
 

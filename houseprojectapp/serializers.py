@@ -579,3 +579,25 @@ class CartPaymentSerializer(serializers.ModelSerializer):
             'card_holder_name', 'card_number', 'expiry_date', 'cvv',
             'total_amount', 'created_at','payment_choice'
         ]
+
+from rest_framework import serializers
+from .models import Wishlist
+from adminapp.models import Products
+
+
+class WishlistSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Wishlist
+        # fields = ['id', 'product', 'added_at']
+        fields=['id','user','product']
+
+    def get_product(self, obj):
+        product = obj.product
+        return {
+            "id": product.id,
+            "name": product.name,
+            "price": product.price,
+            "image": product.image.url if product.image else None  # ✅ /media/...
+        }
